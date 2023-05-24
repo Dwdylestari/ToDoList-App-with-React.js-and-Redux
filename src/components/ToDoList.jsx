@@ -10,6 +10,7 @@ import {
 import { TiPencil } from "react-icons/ti";
 import { BsTrash } from "react-icons/bs";
 import empty from "../assets/add.png";
+
 function TodoList() {
   const dispatch = useDispatch();
   const todoList = useSelector((state) => state.todo.todoList);
@@ -23,6 +24,7 @@ function TodoList() {
       localStorage.setItem("todoList", JSON.stringify(todoList));
     }
   }, [todoList]);
+
   useEffect(() => {
     const localTodoList = JSON.parse(localStorage.getItem("todoList"));
     if (localTodoList) {
@@ -39,7 +41,8 @@ function TodoList() {
       setShowModal(true);
     }
   };
-  const handleUpdateToDoList = (id, task) => {
+
+  const handleUpdateTodoList = (id, task) => {
     if (task.trim().length === 0) {
       alert("Please enter a task");
     } else {
@@ -47,17 +50,18 @@ function TodoList() {
       setShowModal(false);
     }
   };
-  const handleDeleteToDo = (id) => {
-    const updatedToDoList = todoList.filter((todo) => todo.id != id);
-    dispatch(setTodoList(updatedToDoList));
-    localStorage.setItem("todoList", JSON.stringify(updatedToDoList));
+
+  const handleDeleteTodo = (id) => {
+    const updatedTodoList = todoList.filter((todo) => todo.id !== id);
+    dispatch(setTodoList(updatedTodoList));
+    localStorage.setItem("todoList", JSON.stringify(updatedTodoList));
   };
 
-  function handleSort(sortCriteria) {
+  const handleSort = (sortCriteria) => {
     dispatch(sortTodo(sortCriteria));
-  }
+  };
 
-  const sortToDoList = todoList.filter((todo) => {
+  const filteredTodoList = todoList.filter((todo) => {
     if (sortCriteria === "All") return true;
     if (sortCriteria === "Completed" && todo.completed) return true;
     if (sortCriteria === "Active" && !todo.completed) return true;
@@ -67,6 +71,7 @@ function TodoList() {
   const handleToggleCompleted = (id) => {
     dispatch(toggleCompleted({ id }));
   };
+
   return (
     <div>
       {showModal && (
@@ -86,7 +91,7 @@ function TodoList() {
                   <button
                     onClick={() => {
                       setShowModal(false);
-                      handleUpdateToDoList(currentTodo.id, newTask);
+                      handleUpdateTodoList(currentTodo.id, newTask);
                     }}
                     className="bg-sunsetOrange text-white py-3 px-10 rounded-md"
                   >
@@ -123,14 +128,14 @@ function TodoList() {
         </div>
       )}
 
-      <div className=" flex items-center justify-center flex-col">
+      <div className="flex items-center justify-center flex-col">
         {todoList.length === 0 ? (
           <div className="mb-6">
             <div className="sm:w-[500px] sm:h-[500px] min-w-[250px] min-[250px]">
               <img src={empty} alt="" />
             </div>
             <p className="text-center text-Gray">
-              You have no todo's, please add one.
+              You have no todos, please add one.
             </p>
           </div>
         ) : (
@@ -152,22 +157,27 @@ function TodoList() {
               </select>
             </div>
             <div>
-              {sortToDoList.map((todo) => (
+              {filteredTodoList.map((todo) => (
                 <div
                   key={todo.id}
                   className="flex items-center justify-between mb-6 bg-Tangaroa mx-auto w-full md:w-[75%] rounded-md p-4"
                 >
-                  <div
-                    className={`${
-                      todo.completed
-                        ? "line-through text-greenTeal"
-                        : "text-sunsetOrange"
-                    }`}
-                    onClick={() => {
-                      handleToggleCompleted(todo.id);
-                    }}
-                  >
-                    {todo.task}
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={todo.completed}
+                      onChange={() => handleToggleCompleted(todo.id)}
+                      className="mr-2"
+                    />
+                    <div
+                      className={`${
+                        todo.completed
+                          ? "line-through text-greenTeal"
+                          : "text-sunsetOrange"
+                      }`}
+                    >
+                      {todo.task}
+                    </div>
                   </div>
                   <div>
                     <button
@@ -182,7 +192,7 @@ function TodoList() {
                     </button>
                     <button
                       className="bg-sunsetOrange text-white p-1 rounded-md ml-2"
-                      onClick={() => handleDeleteToDo(todo.id)}
+                      onClick={() => handleDeleteTodo(todo.id)}
                     >
                       <BsTrash />
                     </button>
@@ -194,9 +204,7 @@ function TodoList() {
         )}
         <button
           className="bg-sunsetOrange text-center text-white py-3 px-10 rounded-md"
-          onClick={() => {
-            setShowModal(true);
-          }}
+          onClick={() => setShowModal(true)}
         >
           Add Task
         </button>
